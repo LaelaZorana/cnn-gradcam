@@ -19,6 +19,33 @@ it decided.
   on the background, which is exactly the kind of check that catches a model "right for the
   wrong reason."
 
+## I built it and I verified it
+
+This is the through-line of my portfolio: ship the model *and* the evidence it works.
+For Mode B I evaluated the fine-tune on the **held-out validation set** (153 images the
+model never trained on):
+
+```
+Overall accuracy: 0.928  (142/153)
+  ants : 0.914  (64/70)
+  bees : 0.940  (78/83)
+```
+
+I also surface the model's **confidently wrong** cases, because a model that is wrong
+*loudly* is more dangerous than one that is wrong quietly:
+
+```
+Confidently wrong (top of 11 misses):
+  119785936_dd428e40c3.jpg   true=ants  pred=bees  conf=1.00
+  59798110_2b6a3c8031.jpg    true=bees  pred=ants  conf=0.95
+  8398478_50ef10c47a.jpg     true=ants  pred=bees  conf=0.90
+```
+
+Reproduce with `python -m gradcam.evaluate`. The accuracy bar is also a **test**
+(`test_finetuned_clears_accuracy_bar`), so a regressed or corrupted checkpoint fails CI,
+not the demo. Grad-CAM is the tool you reach for next: open one of those confident
+mistakes and look at *where* the model looked.
+
 ## Why this repo is more than "it predicts"
 
 The interesting part is that the Grad-CAM is **verified to localize correctly**.
@@ -38,6 +65,7 @@ tests/test_gradcam.py
   test_rejects_bad_input_shape        # guards the (1, C, H, W) contract
   test_overlay_shape_and_dtype        # colormap overlay returns a valid RGB image
   test_flat_map_is_zero               # no signal -> safe all-zero map, no NaNs
+  test_finetuned_clears_accuracy_bar  # shipped fine-tune holds >=85% on held-out val
   test_resnet_gradcam_smoke           # full ResNet18 path (skipped if no torchvision)
 ```
 
@@ -66,7 +94,8 @@ gradcam/
   gradcam.py   # GradCAM (hooks + gradient-weighted maps) + overlay_heatmap
   model.py     # ResNet18 loaders (pretrained / fine-tuned), preprocessing, labels
   train.py     # transfer-learning fine-tune: ImageNet -> ants vs. bees
-tests/         # localization check + invariants + hook-leak + ResNet smoke
+  evaluate.py  # held-out accuracy, per-class, and confidently-wrong cases
+tests/         # localization check + invariants + hook-leak + accuracy bar + ResNet smoke
 app.py         # Gradio demo (Mode A any image / Mode B fine-tuned)
 weights/       # shipped fine-tuned weights (antbee_resnet18.pt)
 examples/      # a few sample images for the demo

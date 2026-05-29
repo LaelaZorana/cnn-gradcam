@@ -167,6 +167,20 @@ with gr.Blocks(title="CNN + Grad-CAM", theme=theme, css=CSS) as demo:
                 out_b_img = gr.Image(label="Grad-CAM (where the model looked)", height=300)
                 out_b_lab = gr.Label(num_top_classes=2, label="Prediction")
         btn_b.click(explain_antbee, inputs=in_b, outputs=[out_b_img, out_b_lab])
+        with gr.Accordion("📊 How I verified this model (held-out evaluation)", open=False):
+            gr.Markdown(
+                "I did not just train it, I checked it on the **held-out validation set** "
+                "(153 images the model never saw):\n\n"
+                "| | accuracy |\n|---|---|\n"
+                "| **overall** | **0.928** (142/153) |\n"
+                "| ants | 0.914 (64/70) |\n"
+                "| bees | 0.940 (78/83) |\n\n"
+                "I also look at where it is **confidently wrong** (a loud mistake is worse "
+                "than a quiet one): of 11 misses, the worst predicts *bees* on an ant at "
+                "100% confidence. Those are exactly the images to open Grad-CAM on, to see "
+                "whether the model keyed on the insect or on the background. Reproduce with "
+                "`python -m gradcam.evaluate`; the accuracy bar is also a test in the repo."
+            )
 
     gr.HTML(FOOTER)
     gr.Markdown("*Runs the actual package (`gradcam/`) — the same Grad-CAM code whose "

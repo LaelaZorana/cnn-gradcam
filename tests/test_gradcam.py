@@ -135,6 +135,28 @@ def test_flat_map_is_zero():
 torchvision = pytest.importorskip("torchvision")
 
 
+def test_finetuned_clears_accuracy_bar():
+    """Prove the shipped fine-tune actually works: held-out accuracy must clear a bar.
+
+    Skips if the weights or the val data are not present locally, so the suite stays fast
+    and offline by default. When both are present (e.g. after `python -m gradcam.train`),
+    this guards against shipping a regressed or corrupted checkpoint.
+    """
+    from gradcam.model import WEIGHTS_PATH
+    from gradcam.train import DATA_DIR
+
+    if not WEIGHTS_PATH.exists():
+        pytest.skip("fine-tuned weights not present")
+    if not (DATA_DIR / "val").exists():
+        pytest.skip("validation data not downloaded")
+
+    from gradcam.evaluate import evaluate_val
+
+    acc, per_class, wrong = evaluate_val(verbose=False)
+    assert acc >= 0.85, f"held-out accuracy regressed: {acc:.3f}"
+    assert all(c >= 0.80 for c in per_class), f"a class regressed: {per_class}"
+
+
 def test_resnet_gradcam_smoke():
     from gradcam.model import build_resnet18, preprocess, target_layer
 
