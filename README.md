@@ -1,6 +1,6 @@
 # cnn-gradcam
 
-**🔗 Live demo:** [try it on Hugging Face Spaces](https://huggingface.co/spaces/LaelaZ/cnn-gradcam) — upload an image and see *where* a CNN looked, plus a model I actually fine-tuned.
+**🔗 Live demo:** [try it on Hugging Face Spaces](https://huggingface.co/spaces/LaelaZ/cnn-gradcam). Upload an image and see *where* a CNN looked, plus a model I actually fine-tuned.
 
 A small computer-vision project with two halves that tell one story: a CNN that **predicts**,
 and **Grad-CAM** that shows you the evidence behind each prediction. I wrote the Grad-CAM from
@@ -10,9 +10,9 @@ it decided.
 
 ## Two modes
 
-- **Mode A — any image (ImageNet).** A ResNet18 pretrained on ImageNet classifies any photo
+- **Mode A, any image (ImageNet).** A ResNet18 pretrained on ImageNet classifies any photo
   you upload (1000 classes) and Grad-CAM overlays a heatmap of where the evidence was.
-- **Mode B — ants vs. bees (real fine-tune).** I took the ImageNet ResNet18, replaced the
+- **Mode B, ants vs. bees (real fine-tune).** I took the ImageNet ResNet18, replaced the
   1000-way head with a 2-way head, and fine-tuned on the hymenoptera dataset (~240 training
   images, the classic transfer-learning set). The trained weights are committed, so the demo
   classifies without retraining. Grad-CAM then shows whether the model keys on the insect or
@@ -21,7 +21,7 @@ it decided.
 
 ## I built it and I verified it
 
-This is the through-line of my portfolio: ship the model *and* the evidence it works.
+This is the through-line of my portfolio: build the model *and* the evidence it works.
 For Mode B I evaluated the fine-tune on the **held-out validation set** (153 images the
 model never trained on):
 
@@ -73,7 +73,7 @@ tests/test_gradcam.py
 
 A CNN's last conv layer holds a small spatial grid of feature maps (7×7 for ResNet on a
 224×224 image). To see where the network looked for class *c*, ask how much *c*'s score would
-change if each feature map fired a little stronger — that sensitivity is the gradient of the
+change if each feature map fired a little stronger, because that sensitivity is the gradient of the
 score with respect to each map. Average each map's gradient into one weight, take the weighted
 sum of the maps, keep the positive part (ReLU), upsample to the image, and you get a heatmap:
 bright where the evidence for *c* lives. (Selvaraju et al., ICCV 2017.)
