@@ -2,10 +2,10 @@
 Gradio demo for CNN + Grad-CAM.
 
 Two modes, both running the real package code (gradcam/):
-  A) Pretrained ResNet18 (ImageNet, 1000 classes) -- upload ANY photo, get the top-5
+  A) Pretrained ResNet18 (ImageNet, 1000 classes): upload ANY photo, get the top-5
      predictions and a Grad-CAM heatmap showing where the network looked.
   B) A real transfer-learning fine-tune (ImageNet ResNet18 -> ants vs. bees), with the
-     trained weights shipped in weights/. Same Grad-CAM, on a model I actually trained.
+     trained weights saved in weights/. Same Grad-CAM, on a model I actually trained.
 
 The UI is bespoke, not the stock label-bars: the prediction renders as a hero card naming
 the top class with its confidence, the full distribution renders as an animated custom bar
@@ -289,7 +289,7 @@ with gr.Blocks(title="CNN + Grad-CAM", theme=theme, css=CSS) as demo:
         "thing.</p></div>"
     )
 
-    with gr.Tab("Mode A -- any image (ImageNet)"):
+    with gr.Tab("Mode A: any image (ImageNet)"):
         with gr.Row():
             with gr.Column():
                 in_a = gr.Image(label="Upload an image", type="numpy", height=300)
@@ -312,10 +312,10 @@ with gr.Blocks(title="CNN + Grad-CAM", theme=theme, css=CSS) as demo:
         btn_a.click(lambda im: im, inputs=in_a, outputs=view_a)
         btn_a.click(explain_imagenet, inputs=in_a, outputs=[out_a_img, out_a_html])
 
-    with gr.Tab("Mode B -- ants vs. bees (fine-tuned)"):
+    with gr.Tab("Mode B: ants vs. bees (fine-tuned)"):
         gr.HTML('<div class="gc-note">This model started as ImageNet ResNet18, then I '
                 "fine-tuned it on the hymenoptera dataset (about 240 training images). The "
-                "shipped weights do the classifying. Grad-CAM shows whether it keys on the "
+                "trained weights do the classifying. Grad-CAM shows whether it keys on the "
                 "<b>insect</b>, not the background.</div>")
         with gr.Row():
             with gr.Column():
