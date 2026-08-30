@@ -138,17 +138,23 @@ torchvision = pytest.importorskip("torchvision")
 def test_finetuned_clears_accuracy_bar():
     """Prove the shipped fine-tune actually works: held-out accuracy must clear a bar.
 
-    Skips if the weights or the val data are not present locally, so the suite stays fast
-    and offline by default. When both are present (e.g. after `python -m gradcam.train`),
-    this guards against shipping a regressed or corrupted checkpoint.
+    In CI (the CI env var is set) the val split is downloaded so this always runs and a
+    regressed or corrupted checkpoint fails the build. Locally it skips when the val data
+    is absent, so plain `pytest` stays fast and offline; run `python -m gradcam.train` (or
+    just `ensure_data()`) to enable it.
     """
+    import os
+
     from gradcam.model import WEIGHTS_PATH
-    from gradcam.train import DATA_DIR
+    from gradcam.train import DATA_DIR, ensure_data
 
     if not WEIGHTS_PATH.exists():
         pytest.skip("fine-tuned weights not present")
     if not (DATA_DIR / "val").exists():
-        pytest.skip("validation data not downloaded")
+        if os.environ.get("CI"):
+            ensure_data()
+        else:
+            pytest.skip("validation data not downloaded")
 
     from gradcam.evaluate import evaluate_val
 
